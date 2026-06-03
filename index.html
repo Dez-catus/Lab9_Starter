@@ -93,143 +93,145 @@
     // for more configuration options, see https://docs.trackjs.com
   });
 </script>
-  <script>
-  
-  let form = document.querySelector('form');
+<script>
+    // 1. Custom Error Classes (Defined at the top scope)
+    class ValidationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "ValidationError";
+      }
+    }
+
+    class DivisionByZeroError extends Error {
+      constructor(message = "Cannot divide a number by zero.") {
+        super(message);
+        this.name = "DivisionByZeroError";
+      }
+    }
+
+    //Form Submission & Calculator Logic
+    let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
+      
       let output = document.querySelector('output');
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      // Wrap validation and math execution in the try/catch block
+      try {
+        // Validate input presence
+        if (!firstNum.trim() || !secondNum.trim()) {
+          throw new ValidationError("Both input fields must have a value.");
+        }
+        
+        // Validate if inputs are actual numbers
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new ValidationError("Inputs must be numeric values.");
+        }
+
+        // Check for division by zero
+        if (operator === '/' && Number(secondNum) === 0) {
+          throw new DivisionByZeroError();
+        }
+
+        // If validation passes, evaluate the math safely
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      } catch (err) {
+        // Handle our custom errors or unexpected errors gracefully
+        if (err instanceof ValidationError || err instanceof DivisionByZeroError) {
+          console.error(`[Calculation Error] ${err.name}: ${err.message}`);
+          output.innerHTML = ` Error: ${err.message}`;
+        } else {
+          console.error("An unexpected error occurred:", err);
+          output.innerHTML = " An unexpected error occurred.";
+        }
+      } finally {
+        console.log("Calculation attempt finished.");
+      }
     });
 
-    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));  
-  // Try / Catch / Finally & Custom Errors
-  try {
-    // Validate input presence
-    if (!firstNum || !secondNum) {
-      throw new ValidationError("Both input fields must have a value.");
-    }
-    
-    // Validate if inputs are actual numbers
-    if (isNaN(firstNum) || isNaN(secondNum)) {
-      throw new ValidationError("Inputs must be numeric values.");
-    }
+    //Button Testing Console Utilities
+    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
-    // Check for division by zero
-    if (operator === '/' && Number(secondNum) === 0) {
-      throw new DivisionByZeroError();
-    }
+    errorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.textContent.trim();
 
-    // If validation passes, evaluate the math
-    output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+        switch (action) {
+          case 'Console Log':
+            console.log('This is a standard console.log message.');
+            break;
+          case 'Console Error':
+            console.error('This is a simulated console.error alert!');
+            break;
+          case 'Console Count':
+            console.count('Count Button Pressed');
+            break;
+          case 'Console Warn':
+            console.warn('This is a console.warn warning message.');
+            break;
+          case 'Console Assert':
+            const x = 5;
+            const y = 10;
+            console.assert(x === y, `Assertion failed: ${x} does not equal ${y}`);
+            break;
+          case 'Console Clear':
+            console.clear();
+            break;
+          case 'Console Dir':
+            console.dir(document.querySelector('form'));
+            break;
+          case 'Console dirxml':
+            console.dirxml(document.querySelector('form'));
+            break;
+          case 'Console Group Start':
+            console.group('Interactive Log Group');
+            console.log('Inside the group: Step 1');
+            console.log('Inside the group: Step 2');
+            break;
+          case 'Console Group End':
+            console.groupEnd();
+            console.log('Logged outside of the group.');
+            break;
+          case 'Console Table':
+            const courses = [
+              { name: 'CSE 110', type: 'Software Engineering' },
+              { name: 'CSE 100', type: 'Advanced Data Structures' },
+              { name: 'CSE 101', type: 'Algorithms' }
+            ];
+            console.table(courses);
+            break;
+          case 'Start Timer':
+            console.time('Timer Demo');
+            console.log('Timer started...');
+            break;
+          case 'End Timer':
+            console.timeEnd('Timer Demo');
+            break;
+          case 'Console Trace':
+            const deepFunction = () => { deeperFunction(); };
+            const deeperFunction = () => { console.trace('Trace log context:'); };
+            deepFunction();
+            break;
+          case 'Trigger a Global Error':
+            // Intentionally calling an undefined function to break global scope
+            callUndefinedGlobalFunction();
+            break;
+        }
+      });
+    });
 
-  } catch (err) {
-    // Handle our custom errors or unexpected errors gracefully
-    if (err instanceof ValidationError || err instanceof DivisionByZeroError) {
-      console.error(`[Calculation Error] ${err.name}: ${err.message}`);
-      output.innerHTML = ` Error: ${err.message}`;
-    } else {
-      console.error("An unexpected error occurred:", err);
-      output.innerHTML = "An unexpected error occurred.";
-    }
-  } finally {
-    console.log("Calculation attempt finished.");
-  }
-
-//Custom Error Classes
-class ValidationError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = "ValidationError";
-  }
-}
-
-class DivisionByZeroError extends Error {
-  constructor(message = "Cannot divide a number by zero.") {
-    super(message);
-    this.name = "DivisionByZeroError";
-  }
-}
-// Map button text content to specific functionality
-errorBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const action = btn.textContent.trim();
-
-    switch (action) {
-      case 'Console Log':
-        console.log('This is a standard console.log message.');
-        break;
-      case 'Console Error':
-        console.error('This is a simulated console.error alert!');
-        break;
-      case 'Console Count':
-        console.count('Count Button Pressed');
-        break;
-      case 'Console Warn':
-        console.warn('This is a console.warn warning message.');
-        break;
-      case 'Console Assert':
-        const x = 5;
-        const y = 10;
-        console.assert(x === y, `Assertion failed: ${x} does not equal ${y}`);
-        break;
-      case 'Console Clear':
-        console.clear();
-        break;
-      case 'Console Dir':
-        console.dir(document.querySelector('form'));
-        break;
-      case 'Console dirxml':
-        console.dirxml(document.querySelector('form'));
-        break;
-      case 'Console Group Start':
-        console.group('Interactive Log Group');
-        console.log('Inside the group: Step 1');
-        console.log('Inside the group: Step 2');
-        break;
-      case 'Console Group End':
-        console.groupEnd();
-        console.log('Logged outside of the group.');
-        break;
-      case 'Console Table':
-        const courses = [
-          { name: 'CSE 110', type: 'Software Engineering' },
-          { name: 'CSE 100', type: 'Advanced Data Structures' },
-          { name: 'CSE 101', type: 'Algorithms' }
-        ];
-        console.table(courses);
-        break;
-      case 'Start Timer':
-        console.time('Timer Demo');
-        console.log('Timer started...');
-        break;
-      case 'End Timer':
-        console.timeEnd('Timer Demo');
-        break;
-      case 'Console Trace':
-        const deepFunction = () => { deeperFunction(); };
-        const deeperFunction = () => { console.trace('Trace log context:'); };
-        deepFunction();
-        break;
-      case 'Trigger a Global Error':
-        //Intentionally calling an undefined function to break global scope
-        callUndefinedGlobalFunction();
-        break;
-    }
-  });
-});
-
-// Global Error Handler
-window.onerror = function (message, source, lineno, colno, error) {
-  console.log(` Global Error Caught! Message: ${message} at ${source}:${lineno}:${colno}`);
-  
-  // Returning true prevents the default browser error logging firing on top of this log
-  return true; 
-};
+    //4. Global Error Handler
+    window.onerror = function (message, source, lineno, colno, error) {
+      console.log(`Global Error Caught! Message: ${message} at ${source}:${lineno}:${colno}`);
+      
+      // Returning true prevents the default browser error logging firing on top of this log
+      // This ensures your custom logging and TrackJS catch it cleanly
+      return false; 
+    };
   </script>
 </body>
-
 </html>
